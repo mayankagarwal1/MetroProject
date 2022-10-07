@@ -12,10 +12,9 @@ import string
 import random
 import DeepFace as dfe
 from data import Data 
+import json
 
-testVariable = "Hello"
-
-global capture,rec_frame, grey, switch, neg, face, rec, out , cin ,cout, val, allFaces, timeInfo ,FaceId ,models ,backends
+global capture,rec_frame, grey, switch, neg, face, rec, out , cin ,cout, val, allFaces, timeInfo ,FaceId ,models ,backends, testVariable,output
 capture=0
 grey=0
 neg=0
@@ -29,6 +28,9 @@ allFaces = []
 timeInfo = {}
 FaceId = None
 models = Data.getModels()
+output = {"Status":"",
+          "Result":"",
+          "Number":""}
 backends = Data.getBackends()
 #make shots directory to save pics
 try:
@@ -76,22 +78,27 @@ def detect_face(frame):
         pass
     return frame
 def checkout(img_name):
-    global models,allFaces,timeInfo,models,backends
+    global models,allFaces,timeInfo,models,backends,output
+    output["Status"]="Face Captured, Checking Out..."
     entry_time = 0
     exit_time = 0
     try:
         fid = dfe.represent(img_path = "./{}".format(img_name),model_name = models[7],detector_backend = backends[2])
     except:
+        output["Result"]="No Face Detected"
         print("No Face Detected")
+        output["Number"]= "Number of People Checked In :- {}".format(len(allFaces))
         print("Number of People Checked In :- {}".format(len(allFaces)))
         return
     try:
         checkFace = dfe.find(img_representation = fid,representations = allFaces,model_name = models[7],detector_backend = backends[2])
     except:
         print("Error: Try again")
+        output["Number"]= "Number of People Checked In :- {}".format(len(allFaces))
         print("Number of People Checked In :- {}".format(len(allFaces)))
         return
     if(checkFace.empty):
+        output["Result"]="Face Not Found or Never Checked In"
         print("Face Not Found or Never Checked In")
     f = 0
     for i in checkFace['identity']:
@@ -102,20 +109,25 @@ def checkout(img_name):
                 f=1
     exit_time = time.time();
     if(f==1):
+        output["Result"]="CheckOut Complete"
         print("CheckOut Complete")
         print("Entry Time:- {}".format(entry_time))
         print("Exit_time :- {}".format(exit_time))
         print("Duration :- {}".format(exit_time-entry_time))
+        output["Number"]= "Number of People Checked In :- {}".format(len(allFaces))
         print("Number of People Checked In :- {}".format(len(allFaces)))
 def checkin(img_name):
-    global faceId,allFaces,timeInfo
-    
+    global faceId,allFaces,timeInfo,output
+
+    output["Status"]="Face Captured, Detecting..."
     print("Face Captured, Detecting...")
     try:
         fid = dfe.represent(img_path = "./{}".format(img_name),model_name = models[7],detector_backend = backends[2])
     except:
+        output["Result"]="Error..."
         print("Error: ")
     if(len(fid)==0):
+        output["Result"]="No Face Detected"
         print("No Face Detected")
         return
     faceId = []
@@ -126,20 +138,26 @@ def checkin(img_name):
         try:
             checkFace = dfe.find(img_representation = fid,representations = allFaces,model_name = models[7],detector_backend = backends[2])
         except:
+            output["Result"]="No Face Detected"
             print("No Face Detected")
         if(checkFace.empty):
             timeInfo[img_name] = time.time()
             allFaces.append(faceId)
+            output["Result"]="Checkin Successful"
         else:
+            output["Result"]="Face Already Exists"
             print("Face Already Exists")
     else:
+        output["Result"]="Checkin Successful"
         timeInfo[img_name] = time.time()
         allFaces.append(faceId)
+    # output.append("Number of People Checked In :- {}".format(len(allFaces)))
+    output["Number"]= "Number of People Checked In :- {}".format(len(allFaces))
     print("Number of People Checked In :- {}".format(len(allFaces)))
 
 
 def gen_frames():  # generate frame by frame from camera
-    global out, capture,rec_frame
+    global out, capture,rec_frame,cin
     while True:
         success, frame = camera.read() 
         if success:
@@ -155,15 +173,15 @@ def gen_frames():  # generate frame by frame from camera
                 rec_frame=frame
                 frame= cv2.putText(cv2.flip(frame,1),"Recording...", (0,25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),4)
                 frame=cv2.flip(frame,1)
-            if(cin or cout):
+            if(cin==True or cout==True):
                 global val, models,backends
                 now = int(time.time())
                 if(now%5 ==0 and now !=val):
                     val = now
                     img_name = ''.join(random.choices(string.ascii_uppercase +string.digits, k=50)) + ".png"
-                    testVariable = img_name
-                    print(testVariable)
                     cv2.imwrite(img_name, frame)
+                    if(cin==True and cout == True):
+                        cin = False
                     if(cin):
                         checkin(img_name)
                     elif(cout):
@@ -185,9 +203,20 @@ def gen_frames():  # generate frame by frame from camera
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/getData', methods=['POST'])
+def get_data():
+    global output
+    out = output
+    # if(cin == False):
+    #     return json.dumps({})
+    # output = {"Status":"",
+    #       "Result":"",
+    #       "Number":""}
+    return json.dumps(out)
+
 @app.route('/',methods=['POST','GET'])
 def tasks():
-    global switch,camera
+    global switch,camera, output
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
             global capture
@@ -200,6 +229,9 @@ def tasks():
             cin = not cin
         elif request.form.get("checkout") == "CheckOut":
             global cout
+            if(cin==True):
+                cin = not cin
+                print("hello")
             cout = not cout
         elif  request.form.get('neg') == 'Negative':
             global neg
@@ -235,8 +267,8 @@ def tasks():
                           
                  
     elif request.method=='GET':
-        return render_template('index.html', variable=testVariable)
-    return render_template('index.html', variable=testVariable)
+        return render_template('index.html', variable=output) 
+    return render_template('index.html', variable=output)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@
             <div class="col-lg-8  offset-lg-2">
     
                 
-                <h2 class="mt-5">CAMERA APP {{ variable }}</h2>
+                <h2 class="mt-5">CAMERA APP </h2>
                 <form method="post" action="{{ url_for('tasks') }}">
                 <input type="submit" value="Stop/Start" name="stop" />
                 <!-- <input type="submit" value="Capture" name="click"/> -->
@@ -13,16 +13,11 @@
                 <input type="submit" value="CheckIn" name="checkin" />
                 <input type="submit" value="CheckOut" name="checkout" />
                 <input type="submit" value="Face Only" name="face" />
+                <input type="submit" value="Reload" name="reload" id="reloadBtn" />
                 <!-- <input type="submit" value="Start/Stop Recording" name="rec" /> -->
                 </form>
                 <img src="{{ url_for('video_feed') }}" height="50%">
                 
-                
-                <ul> 
-                    {% for user in output %} 
-                      <li><a href="#">{{ user }}</a></li> 
-                    {% endfor %} 
-                </ul> 
                 <!-- <h3 style="font-family:courier;">Instructions:</h3> -->
                 <!-- <ol style="font-family:courier;">
                 <li>Stop/Start--Toggle between stop or start live streaming</li>
@@ -34,5 +29,46 @@
                 
             </div>
         </div>
+        <div id="status">
+            
+        </div>
+        <br/>
+        <div id="result">
+            
+        </div>
+        <br/>
+        <div id="number">
+            
+        </div>
     </div>
+    <script>
+        // setInterval(function(){
+        //     document.getElementById("reloadBtn").click();
+        // }, 1000)
+
+        //Calls the update_data_frame function every 2000 milliseconds
+    var myVar = setInterval(update_data_frame, 4000);
+
+    //This function makes a POST request to the flask route "/update"
+    //The value of return response.json() is the return value of the "/update"
+    //In your case this is going to be the dataframe
+    //".then(function(myjson))..." captures the return value to be used as required
+    function update_data_frame () {
+        url = '/getData';
+        fetch(url,{method:'POST'})
+        .then(function(response) {
+        return response.json();
+        })
+        .then(function(myJson)
+        {
+        store = myJson;
+        //This line prints out "{somedata":"somedatavalue","somedata1":"somedatavalue1"}" every 2000 milliseconds
+        console.log(store);
+        document.getElementById("status").innerHTML = store["Status"] 
+        document.getElementById("result").innerHTML = store["Result"] 
+        document.getElementById("number").innerHTML = store["Number"]
+        // document.getElementById("logData").append(<br/>)
+        });
+    }
+    </script>
     </body>
