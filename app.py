@@ -1,19 +1,35 @@
+from tkinter import Frame
+from ast import arg
 from flask import Flask, render_template, Response, request
 import cv2
 import datetime, time
 import os, sys
 import numpy as np
 from threading import Thread
+import threading
 from project import Capture
+import string
+import random
+import DeepFace as dfe
+from data import Data 
 
-global capture,rec_frame, grey, switch, neg, face, rec, out 
+testVariable = "Hello"
+
+global capture,rec_frame, grey, switch, neg, face, rec, out , cin ,cout, val, allFaces, timeInfo ,FaceId ,models ,backends
 capture=0
 grey=0
 neg=0
 face=0
 switch=1
 rec=0
-
+cin = False
+cout = False
+val = 0
+allFaces = []
+timeInfo = {}
+FaceId = None
+models = Data.getModels()
+backends = Data.getBackends()
 #make shots directory to save pics
 try:
     os.mkdir('./shots')
@@ -59,7 +75,68 @@ def detect_face(frame):
     except Exception as e:
         pass
     return frame
- 
+def checkout(img_name):
+    global models,allFaces,timeInfo,models,backends
+    entry_time = 0
+    exit_time = 0
+    try:
+        fid = dfe.represent(img_path = "./{}".format(img_name),model_name = models[7],detector_backend = backends[2])
+    except:
+        print("No Face Detected")
+        print("Number of People Checked In :- {}".format(len(allFaces)))
+        return
+    try:
+        checkFace = dfe.find(img_representation = fid,representations = allFaces,model_name = models[7],detector_backend = backends[2])
+    except:
+        print("Error: Try again")
+        print("Number of People Checked In :- {}".format(len(allFaces)))
+        return
+    if(checkFace.empty):
+        print("Face Not Found or Never Checked In")
+    f = 0
+    for i in checkFace['identity']:
+        for j in allFaces:
+            if(i==j[0]):
+                entry_time = timeInfo[i]
+                allFaces.remove(j)
+                f=1
+    exit_time = time.time();
+    if(f==1):
+        print("CheckOut Complete")
+        print("Entry Time:- {}".format(entry_time))
+        print("Exit_time :- {}".format(exit_time))
+        print("Duration :- {}".format(exit_time-entry_time))
+        print("Number of People Checked In :- {}".format(len(allFaces)))
+def checkin(img_name):
+    global faceId,allFaces,timeInfo
+    
+    print("Face Captured, Detecting...")
+    try:
+        fid = dfe.represent(img_path = "./{}".format(img_name),model_name = models[7],detector_backend = backends[2])
+    except:
+        print("Error: ")
+    if(len(fid)==0):
+        print("No Face Detected")
+        return
+    faceId = []
+    faceId.append(img_name)
+    faceId.append(fid)
+    if(len(allFaces) !=0):
+    # print("hg")
+        try:
+            checkFace = dfe.find(img_representation = fid,representations = allFaces,model_name = models[7],detector_backend = backends[2])
+        except:
+            print("No Face Detected")
+        if(checkFace.empty):
+            timeInfo[img_name] = time.time()
+            allFaces.append(faceId)
+        else:
+            print("Face Already Exists")
+    else:
+        timeInfo[img_name] = time.time()
+        allFaces.append(faceId)
+    print("Number of People Checked In :- {}".format(len(allFaces)))
+
 
 def gen_frames():  # generate frame by frame from camera
     global out, capture,rec_frame
@@ -68,10 +145,6 @@ def gen_frames():  # generate frame by frame from camera
         if success:
             if(face):                
                 frame= detect_face(frame)
-            if(grey):
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            if(neg):
-                frame=cv2.bitwise_not(frame)    
             if(capture):
                 capture=0
                 now = datetime.datetime.now()
@@ -82,8 +155,20 @@ def gen_frames():  # generate frame by frame from camera
                 rec_frame=frame
                 frame= cv2.putText(cv2.flip(frame,1),"Recording...", (0,25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255),4)
                 frame=cv2.flip(frame,1)
-            
-                
+            if(cin or cout):
+                global val, models,backends
+                now = int(time.time())
+                if(now%5 ==0 and now !=val):
+                    val = now
+                    img_name = ''.join(random.choices(string.ascii_uppercase +string.digits, k=50)) + ".png"
+                    testVariable = img_name
+                    print(testVariable)
+                    cv2.imwrite(img_name, frame)
+                    if(cin):
+                        checkin(img_name)
+                    elif(cout):
+                        checkout(img_name)
+           
             try:
                 ret, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
                 frame = buffer.tobytes()
@@ -94,18 +179,13 @@ def gen_frames():  # generate frame by frame from camera
                 
         else:
             pass
-
-
-@app.route('/')
-def index():
-    return render_template('index.html')
     
     
 @app.route('/video_feed')
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/requests',methods=['POST','GET'])
+@app.route('/',methods=['POST','GET'])
 def tasks():
     global switch,camera
     if request.method == 'POST':
@@ -115,6 +195,12 @@ def tasks():
         elif  request.form.get('grey') == 'Grey':
             global grey
             grey=not grey
+        elif request.form.get("checkin") == "CheckIn":
+            global cin
+            cin = not cin
+        elif request.form.get("checkout") == "CheckOut":
+            global cout
+            cout = not cout
         elif  request.form.get('neg') == 'Negative':
             global neg
             neg=not neg
@@ -141,15 +227,16 @@ def tasks():
                 fourcc = cv2.VideoWriter_fourcc(*'XVID')
                 out = cv2.VideoWriter('vid_{}.avi'.format(str(now).replace(":",'')), fourcc, 20.0, (640, 480))
                 #Start new thread for recording the video
-                thread = Thread(target = record, args=[out,])
-                thread.start()
-            elif(rec==False):
-                out.release()
+                record(Frame)
+                # thread = Thread(target = record, args=[out,])
+                # thread.start()
+            # elif(rec==False):
+            #     out.release()
                           
                  
     elif request.method=='GET':
-        return render_template('index.html')
-    return render_template('index.html')
+        return render_template('index.html', variable=testVariable)
+    return render_template('index.html', variable=testVariable)
 
 
 if __name__ == '__main__':

@@ -1,1 +1,2 @@
-opencv_frame_*
+*.png
+*.pyc
