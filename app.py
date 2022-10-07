@@ -157,7 +157,7 @@ def checkin(img_name):
 
 
 def gen_frames():  # generate frame by frame from camera
-    global out, capture,rec_frame,cin
+    global cout, capture,rec_frame,cin
     while True:
         success, frame = camera.read() 
         if success:
@@ -216,7 +216,7 @@ def get_data():
 
 @app.route('/',methods=['POST','GET'])
 def tasks():
-    global switch,camera, output
+    global switch,camera, output,cout
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
             global capture
@@ -226,9 +226,11 @@ def tasks():
             grey=not grey
         elif request.form.get("checkin") == "CheckIn":
             global cin
+            if(cout==True):
+                cout = False
             cin = not cin
         elif request.form.get("checkout") == "CheckOut":
-            global cout
+            
             if(cin==True):
                 cin = not cin
                 print("hello")

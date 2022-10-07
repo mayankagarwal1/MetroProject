@@ -1,43 +1,100 @@
 <body>
+    <style>
+        #data {  
+        width: 320px;
+        padding: 10px;
+        border: 5px solid gray;
+        margin: 0;
+    }
+        
+        .button-18 {
+        align-items: center;
+        background-color: #0A66C2;
+        border: 0;
+        border-radius: 100px;
+        box-sizing: border-box;
+        color: #ffffff;
+        cursor: pointer;
+        display: inline-flex;
+        font-family: -apple-system, system-ui, system-ui, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        justify-content: center;
+        line-height: 20px;
+        max-width: 480px;
+        min-height: 40px;
+        min-width: 0px;
+        overflow: hidden;
+        padding: 0px;
+        padding-left: 20px;
+        padding-right: 20px;
+        text-align: center;
+        touch-action: manipulation;
+        transition: background-color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, box-shadow 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s, color 0.167s cubic-bezier(0.4, 0, 0.2, 1) 0s;
+        user-select: none;
+        -webkit-user-select: none;
+        vertical-align: middle;
+        }
+
+    .button-18:hover,
+    .button-18:focus { 
+        background-color: #16437E;
+        color: #ffffff;
+    }
+
+    .button-18:active {
+    background: #09223b;
+    color: rgb(255, 255, 255, .7);
+    }
+
+    .button-18:disabled { 
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, .08);
+    color: rgba(0, 0, 0, .3);
+    }
+    #img {
+        padding: 50px 90px 60px 40px;
+    }
+    /* #btns{
+        top:50%;
+        left: 75%;
+    } */
+    </style>
+
     <div class="container">
+        <h2 class="mt-5">CAMERA APP </h2>
         <div class="row">
-            <div class="col-lg-8  offset-lg-2">
-    
-                
-                <h2 class="mt-5">CAMERA APP </h2>
+            <img id = "img" src="{{ url_for('video_feed') }}" height="50%">
+            <div  id = "btns" class="col-lg-8  offset-lg-2">
                 <form method="post" action="{{ url_for('tasks') }}">
-                <input type="submit" value="Stop/Start" name="stop" />
+                <input type="submit" class = "button-18" value="Stop/Start" name="stop" />  <br>
                 <!-- <input type="submit" value="Capture" name="click"/> -->
                 <!-- <input type="submit" value="Grey" name="grey" /> -->
                 <!-- <input type="submit" value="Negative" name="neg" /> -->
-                <input type="submit" value="CheckIn" name="checkin" />
-                <input type="submit" value="CheckOut" name="checkout" />
-                <input type="submit" value="Face Only" name="face" />
-                <input type="submit" value="Reload" name="reload" id="reloadBtn" />
+                <input type="submit" class = "button-18" value="CheckIn" name="checkin" /> <br>
+                <input type="submit" class = "button-18" value="CheckOut" name="checkout" /> <br>
+                <input type="submit" class = "button-18" value="Face Only" name="face" /> <br>
+                <!-- <input type="submit" class = "button-18" value="Reload" name="reload" id="reloadBtn" /> -->
                 <!-- <input type="submit" value="Start/Stop Recording" name="rec" /> -->
                 </form>
-                <img src="{{ url_for('video_feed') }}" height="50%">
                 
-                <!-- <h3 style="font-family:courier;">Instructions:</h3> -->
-                <!-- <ol style="font-family:courier;">
-                <li>Stop/Start--Toggle between stop or start live streaming</li>
-                <li>Capture--Take still-shot and save in the 'shots' directory</li>
-                <li>Grey--Toggle between grayscale and RGB output</li>
-                <li>Negative--Toggle between negative and RGB output</li>
-                <li>Face Only--Shows just your face if present(Toggle on/off)</li> 
-                <li>Start/Stop Recording--Toggle between starting and stopping video recording</li> </ol>	 -->
+                
+              
                 
             </div>
         </div>
-        <div id="status">
-            
+        <div id="data">
+            <div id="status">
+                
+            </div>
+            <br/>
+            <div id="result">
+                
+            </div>
+            <br/>
+            <div id="number">
+
         </div>
-        <br/>
-        <div id="result">
-            
-        </div>
-        <br/>
-        <div id="number">
             
         </div>
     </div>
@@ -47,7 +104,7 @@
         // }, 1000)
 
         //Calls the update_data_frame function every 2000 milliseconds
-    var myVar = setInterval(update_data_frame, 4000);
+    var myVar = setInterval(update_data_frame, 3000);
 
     //This function makes a POST request to the flask route "/update"
     //The value of return response.json() is the return value of the "/update"
@@ -72,3 +129,6 @@
     }
     </script>
     </body>
+
+
+    <!-- HTML !-->
