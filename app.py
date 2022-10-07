@@ -28,9 +28,15 @@ allFaces = []
 timeInfo = {}
 FaceId = None
 models = Data.getModels()
-output = {"Status":"",
+output = {
+        "id":""
+        ,"Status":"",
           "Result":"",
-          "Number":""}
+          "Number":"",
+          "Entry":"",
+          "Exit":"",
+          "Duration":""}
+
 backends = Data.getBackends()
 #make shots directory to save pics
 try:
@@ -79,6 +85,7 @@ def detect_face(frame):
     return frame
 def checkout(img_name):
     global models,allFaces,timeInfo,models,backends,output
+    output["id"] = "2"
     output["Status"]="Face Captured, Checking Out..."
     entry_time = 0
     exit_time = 0
@@ -93,6 +100,7 @@ def checkout(img_name):
     try:
         checkFace = dfe.find(img_representation = fid,representations = allFaces,model_name = models[7],detector_backend = backends[2])
     except:
+        output["Result"] = "Error: Try again"
         print("Error: Try again")
         output["Number"]= "Number of People Checked In :- {}".format(len(allFaces))
         print("Number of People Checked In :- {}".format(len(allFaces)))
@@ -111,6 +119,9 @@ def checkout(img_name):
     if(f==1):
         output["Result"]="CheckOut Complete"
         print("CheckOut Complete")
+        output["Entry"] = "Entry Time:- {}".format(entry_time)
+        output["Exit"] = "Exit_time :- {}".format(exit_time)
+        output["Duration"] = "Duration :- {}".format(exit_time-entry_time)
         print("Entry Time:- {}".format(entry_time))
         print("Exit_time :- {}".format(exit_time))
         print("Duration :- {}".format(exit_time-entry_time))
@@ -118,7 +129,7 @@ def checkout(img_name):
         print("Number of People Checked In :- {}".format(len(allFaces)))
 def checkin(img_name):
     global faceId,allFaces,timeInfo,output
-
+    output["id"] = "1"
     output["Status"]="Face Captured, Detecting..."
     print("Face Captured, Detecting...")
     try:
@@ -216,7 +227,7 @@ def get_data():
 
 @app.route('/',methods=['POST','GET'])
 def tasks():
-    global switch,camera, output,cout
+    global switch,camera, output,cout,cin
     if request.method == 'POST':
         if request.form.get('click') == 'Capture':
             global capture
@@ -225,12 +236,27 @@ def tasks():
             global grey
             grey=not grey
         elif request.form.get("checkin") == "CheckIn":
-            global cin
+            
+            output = {
+                "id":""
+                ,"Status":"",
+          "Result":"",
+          "Number":"",
+          "Entry":"",
+          "Exit":"",
+          "Duration":""}
             if(cout==True):
                 cout = False
             cin = not cin
         elif request.form.get("checkout") == "CheckOut":
-            
+            output = {
+                "id":""
+                ,"Status":"",
+          "Result":"",
+          "Number":"",
+          "Entry":"",
+          "Exit":"",
+          "Duration":""}
             if(cin==True):
                 cin = not cin
                 print("hello")
@@ -244,7 +270,16 @@ def tasks():
             if(face):
                 time.sleep(4)   
         elif  request.form.get('stop') == 'Stop/Start':
-            
+            cin = False
+            cout = False
+            output = {
+                "id":""
+                ,"Status":"",
+          "Result":"",
+          "Number":"",
+          "Entry":"",
+          "Exit":"",
+          "Duration":""}
             if(switch==1):
                 switch=0
                 camera.release()
