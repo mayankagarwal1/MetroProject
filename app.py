@@ -7,7 +7,6 @@ import os, sys
 import numpy as np
 from threading import Thread
 import threading
-from project import Capture
 import string
 import random
 import DeepFace as dfe
@@ -32,7 +31,7 @@ output = {
         "id":""
         ,"Status":"",
           "Result":"",
-          "Number":"",
+          "Number":"Number of People Checked In :- {}".format(len(allFaces)),
           "Entry":"",
           "Exit":"",
           "Duration":""}
@@ -197,6 +196,9 @@ def gen_frames():  # generate frame by frame from camera
                         checkin(img_name)
                     elif(cout):
                         checkout(img_name)
+                    try: 
+                        os.remove(img_name)
+                    except: pass
            
             try:
                 ret, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
@@ -241,7 +243,7 @@ def tasks():
                 "id":""
                 ,"Status":"",
           "Result":"",
-          "Number":"",
+          "Number":"Number of People Checked In :- {}".format(len(allFaces)),
           "Entry":"",
           "Exit":"",
           "Duration":""}
@@ -253,7 +255,7 @@ def tasks():
                 "id":""
                 ,"Status":"",
           "Result":"",
-          "Number":"",
+          "Number":"Number of People Checked In :- {}".format(len(allFaces)),
           "Entry":"",
           "Exit":"",
           "Duration":""}
@@ -276,7 +278,7 @@ def tasks():
                 "id":""
                 ,"Status":"",
           "Result":"",
-          "Number":"",
+          "Number":"Number of People Checked In :- {}".format(len(allFaces)),
           "Entry":"",
           "Exit":"",
           "Duration":""}

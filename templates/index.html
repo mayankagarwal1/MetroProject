@@ -1,7 +1,7 @@
 <body>
     <style>
         #data {  
-        width: 320px;
+        width: 430px;
         padding: 10px;
         border: 5px solid gray;
         margin: 0;
@@ -62,18 +62,21 @@
     </style>
 
     <div class="container">
-        <h2 class="mt-5">CAMERA APP </h2>
+        <h2 class="mt-5">Fraudulence </h2>
         <div class="row">
-            <img id = "img" src="{{ url_for('video_feed') }}" height="50%">
+            <img id = "img" src="{{ url_for('video_feed') }}" height="50%"> 
+            <div id="number">
+            </div>
+            <br>
             <div  id = "btns" class="col-lg-8  offset-lg-2">
                 <form method="post" action="{{ url_for('tasks') }}">
-                <input type="submit" class = "button-18" value="Stop/Start" name="stop" />  <br>
+                <input type="submit" class = "button-18" value="Stop/Start" name="stop" />  
                 <!-- <input type="submit" value="Capture" name="click"/> -->
                 <!-- <input type="submit" value="Grey" name="grey" /> -->
                 <!-- <input type="submit" value="Negative" name="neg" /> -->
-                <input type="submit" class = "button-18" value="CheckIn" name="checkin" /> <br>
-                <input type="submit" class = "button-18" value="CheckOut" name="checkout" /> <br>
-                <input type="submit" class = "button-18" value="Face Only" name="face" /> <br>
+                <input type="submit" class = "button-18" value="CheckIn" name="checkin" /> 
+                <input type="submit" class = "button-18" value="CheckOut" name="checkout" /> 
+                <input type="submit" class = "button-18" value="Face Only" name="face" /> 
                 <!-- <input type="submit" class = "button-18" value="Reload" name="reload" id="reloadBtn" /> -->
                 <!-- <input type="submit" value="Start/Stop Recording" name="rec" /> -->
                 </form>
@@ -92,10 +95,16 @@
                 
             </div>
             <br/>
-            <div id="number">
-
-        </div>
-            
+            <div id="entry">
+                
+            </div>
+            <br/>
+            <div id="exit">
+                
+            </div>
+            <br/>
+            <div id="duration">
+            </div>
         </div>
     </div>
     <script>
@@ -104,7 +113,7 @@
         // }, 1000)
 
         //Calls the update_data_frame function every 2000 milliseconds
-    var myVar = setInterval(update_data_frame, 3000);
+    var myVar = setInterval(update_data_frame, 1000);
 
     //This function makes a POST request to the flask route "/update"
     //The value of return response.json() is the return value of the "/update"
@@ -124,6 +133,21 @@
         document.getElementById("status").innerHTML = store["Status"] 
         document.getElementById("result").innerHTML = store["Result"] 
         document.getElementById("number").innerHTML = store["Number"]
+    
+        if(store["id"]=="2" && store["Result"] == "CheckOut Complete")
+        {
+            console.log(store["Result"] == "CheckOut Complete")
+            document.getElementById("entry").innerHTML = store["Entry"]
+            document.getElementById("exit").innerHTML = store["Exit"]
+            document.getElementById("duration").innerHTML = store["Duration"]
+        }
+        else{
+            document.getElementById("entry").innerHTML = ""
+            document.getElementById("exit").innerHTML = ""
+            document.getElementById("duration").innerHTML = ""
+        }
+
+        
         // document.getElementById("logData").append(<br/>)
         });
     }
