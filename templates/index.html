@@ -53,18 +53,28 @@
     color: rgba(0, 0, 0, .3);
     }
     #img {
-        padding: 50px 90px 60px 40px;
+        padding: 5px 90px 50px 130px
     }
     /* #btns{
         top:50%;
         left: 75%;
     } */
+    .container {
+    margin: auto;
+    width: 50%;
+    border: 3px solid green;
+    padding: 10px;
+        }
+        #number{
+            text-decoration:underline;
+            font-size: 22px;
+        }
     </style>
 
-    <div class="container">
-        <h2 class="mt-5">Fraudulence </h2>
-        <div class="row">
-            <img id = "img" src="{{ url_for('video_feed') }}" height="50%"> 
+    <div class="container" >
+        <!-- <h2 class="mt-5">Fraudulencdfdsfe </h2> -->
+        <div class="row" class="center">
+            <img id = "img" src="{{ url_for('video_feed') }}" height="50%" > 
             <div id="number">
             </div>
             <br>
@@ -80,10 +90,6 @@
                 <!-- <input type="submit" class = "button-18" value="Reload" name="reload" id="reloadBtn" /> -->
                 <!-- <input type="submit" value="Start/Stop Recording" name="rec" /> -->
                 </form>
-                
-                
-              
-                
             </div>
         </div>
         <div id="data">
